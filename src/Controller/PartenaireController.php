@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Entity\Compte;
 use App\Entity\Partenaire;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -80,5 +81,36 @@ class PartenaireController extends AbstractController
             .' and new utilisateur with id: '.$user->getId()
             .' and new compte with id: '.$compte->getId()
         );
+    }
+    /**
+     * @Route("/bloquer", name="bloquer", methods={"POST"})
+     */
+    public function userBloquer(Request $request, UserRepository $userRepo,EntityManagerInterface $entityManager): Response
+    {
+        $values = json_decode($request->getContent());
+
+        $bloq=$userRepo->findOneByUsername($values->username);
+       if($bloq->getStatus()=="bloquer" ){
+
+        $bloq->setStatus("activer");
+        $bloq->setRoles(["ROLE_ADMIN"]);
+          
+          }
+       elseif($bloq->getStatus()=="activer")
+       {
+           $bloq->setStatus("bloquer");
+           $bloq->setRoles(["ROLE_ADMINLOCK"]);
+       }
+
+        $entityManager->flush();
+        $data=
+        [
+            'status' => 200,
+            'message' => 'message bloqué/débloqué'
+        ];
+      
+        return new JsonResponse($data);
+
+        
     }
 }

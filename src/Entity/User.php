@@ -72,7 +72,7 @@ class User implements UserInterface
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Partenaire", inversedBy="users")
      */
-    private $Partenaire;
+   private $Partenaire;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Compte", inversedBy="user")
@@ -81,7 +81,7 @@ class User implements UserInterface
 
    public function __construct()
     {
-        $this->Partenaire = new ArrayCollection();
+        $this->Partenaire = new ArrayCollection();   
         $this->compte = new ArrayCollection();
     }
 

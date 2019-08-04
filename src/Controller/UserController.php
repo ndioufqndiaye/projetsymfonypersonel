@@ -2,76 +2,53 @@
 
 namespace App\Controller;
 
+
 use App\Entity\User;
-use App\Entity\Compte;
-use App\Entity\Partenaire;
+use App\Form\UserType;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
-
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-
 /**
- * @Route("/api")
+ * @Route("/api/user")
  */
 class UserController extends AbstractController
 {
+
     /**
-     * @Route("/user", name="register", methods={"POST"})
+     * @Route("/new", name="user_new", methods={"GET","POST"})
      */
-    public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder, EntityManagerInterface $entityManager, SerializerInterface $serializer, ValidatorInterface $validator)
+    public function register(Request $request,SerializerInterface $serializer, UserPasswordEncoderInterface $passwordEncoder): Response
     {
-        $values = json_decode($request->getContent());
-        if(isset($values->username,$values->password)) {
-            $user = new User();
-            $user->setMatricule($values->matricule);
-            $user->setNom($values->nom);
-            $user->setPrenom($values->prenom);
-            $user->setEmail($values->email);
-            $user->setAdresse($values->adresse);
-            $user->setTelephone($values->telephone);
-            $user->setStatus($values->status);
-            $user->setUsername($values->username);
-            $user->setPassword($passwordEncoder->encodePassword($user, $values->password));
-            $user->setRoles($values->roles);
+        $user = new User();
+        $form = $this->createForm(UserType::class, $user);
+        $form->handleRequest($request);
+        $user=$serializer->deserialize($request->getContent(), User::class, 'json');
 
-            $rep=$this->getDoctrine()->getRepository(Partenaire::class);
-            $Partenaire=$rep->find($values->Partenaire);
-            $user->setPartenaire($Partenaire);
-
-            $rep=$this->getDoctrine()->getRepository(Compte::class);
-            $compte=$rep->find($values->compte);
-            $user->setCompte($compte);
-
-            $errors = $validator->validate($user);
-            if(count($errors)) {
-                $errors = $serializer->serialize($errors, 'json');
-                return new Response($errors, 500, [
-                    'Content-Type' => 'application/json'
-                ]);
-            }
-
-
+        if ($form->isSubmitted() && $form->isValid()) {
+            // encode the plain password
+            $user->setPassword(
+                $passwordEncoder->encodePassword(
+                    $user,
+                    $form->get('plainPassword')->getData()
+                )
+            );
+            $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($user);
             $entityManager->flush();
 
-            $data = [
-                'status' => 201,
-                'message' => 'L\'utilisateur a été créé'
-            ];
+            // do anything else you need here, like send an email
 
-            return new JsonResponse($data, 201);
+            return $this->redirectToRoute('user_new');
         }
-        $data = [
-            'status' => 500,
-            'message' => 'Vous devez renseigner les clés username et password'
-        ];
-        return new JsonResponse($data, 500);
+
+        /*return $this->render('registration/register.html.twig', [
+            'registrationForm' => $form->createView(),
+        ]);*/
     }
 
     /**
@@ -85,4 +62,49 @@ class UserController extends AbstractController
             'roles' => $user->getRoles()
         ]);
     }
+
+    /**
+     * @Route("/{id}", name="user_show", methods={"GET"})
+     */
+    public function show(User $user): Response
+    {
+        return $this->render('user/show.html.twig', [
+            'user' => $user,
+        ]);
+    }
+
+    /**
+     * @Route("/{id}/edit", name="user_edit", methods={"GET","POST"})
+     */
+    public function edit(Request $request, User $user): Response
+    {
+        $form = $this->createForm(UserType::class, $user);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->getDoctrine()->getManager()->flush();
+
+            return $this->redirectToRoute('user_index');
+        }
+
+        return $this->render('user/edit.html.twig', [
+            'user' => $user,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @Route("/{id}", name="user_delete", methods={"DELETE"})
+     */
+    public function delete(Request $request, User $user): Response
+    {
+        if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->request->get('_token'))) {
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->remove($user);
+            $entityManager->flush();
+        }
+
+        return $this->redirectToRoute('user_index');
+    }
+    
 }
