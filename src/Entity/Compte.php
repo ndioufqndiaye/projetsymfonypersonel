@@ -140,7 +140,7 @@ class Compte
     /**
      * @return Collection|User[]
      */
-    public function getUser(): Collection
+   public function getUser(): Collection
     {
         return $this->user;
     }

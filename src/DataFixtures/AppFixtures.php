@@ -32,6 +32,8 @@ class AppFixtures extends Fixture
         $user->setAdresse('dakar');
         $user->setTelephone(775452210);
         $user->setStatus('activer');
+        //$user->setPartenaire();
+        //$user->setCompte();
        
 
        

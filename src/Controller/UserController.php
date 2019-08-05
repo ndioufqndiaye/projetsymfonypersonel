@@ -14,7 +14,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 /**
- * @Route("/api/user")
+ * @Route("/user")
  */
 class UserController extends AbstractController
 {
@@ -27,28 +27,44 @@ class UserController extends AbstractController
         $user = new User();
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
-        $user=$serializer->deserialize($request->getContent(), User::class, 'json');
+
+        $data=$request->request->all();
+        $file=$request->files->all()['imageName'];
+
+        $form->submit($data);
 
         if ($form->isSubmitted() && $form->isValid()) {
             // encode the plain password
+
+            $user->setMatricule($values->matricule);
+            $user->setNom($values->nom);
+            $user->setPrenom($values->prenom);
+            $user->setEmail($values->email);
+            $user->setAdresse($values->adresse);
+            $user->setTelephone($values->telephone);
+            $user->setStatus($values->status);
+            $user->setUsername($values->username);
+
             $user->setPassword(
                 $passwordEncoder->encodePassword(
                     $user,
                     $form->get('plainPassword')->getData()
                 )
             );
+            $user->setRoles($values->roles);
+            $user->setImageFile($file);
+            $user->setUpdatedAt(new \DateTime());
+
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($user);
             $entityManager->flush();
 
             // do anything else you need here, like send an email
 
-            return $this->redirectToRoute('user_new');
+            return $this->handleView($this->view(['status'=> 'ok'],Respone::HTTP_CREATED));
         }
 
-        /*return $this->render('registration/register.html.twig', [
-            'registrationForm' => $form->createView(),
-        ]);*/
+        return $this->handleView($this->view($form->getErrors()));
     }
 
     /**

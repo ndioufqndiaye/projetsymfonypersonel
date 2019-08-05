@@ -2,13 +2,20 @@
 
 namespace App\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\Collection;
+use Symfony\Component\HttpFoundation\File\File;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints\Email;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
+ * @Vich\Uploadable
  */
 class User implements UserInterface
 {
@@ -26,12 +33,14 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="json")
+    
      */
     private $roles = [];
 
     /**
      * @var string The hashed password
      * @ORM\Column(type="string")
+     
      */
     private $password;
      /**
@@ -41,31 +50,38 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=50)
+    
      */
+     
     private $nom;
 
     /**
      * @ORM\Column(type="string", length=50)
+    
      */
     private $prenom;
 
     /**
      * @ORM\Column(type="string", length=25)
+     
      */
     private $email;
 
     /**
      * @ORM\Column(type="string", length=30)
+     
      */
     private $adresse;
 
     /**
      * @ORM\Column(type="integer")
+     
      */
     private $telephone;
 
     /**
      * @ORM\Column(type="string", length=20)
+    
      */
     private $status;
 
@@ -79,6 +95,8 @@ class User implements UserInterface
      */
     private $compte;
 
+     
+   
    public function __construct()
     {
         $this->Partenaire = new ArrayCollection();   
@@ -265,4 +283,38 @@ class User implements UserInterface
 
         return $this;
     }
+
+    /**
+     * If manually uploading a file (i.e. not using Symfony Form) ensure an instance
+     * of 'UploadedFile' is injected into this setter to trigger the update. If this
+     * bundle's configuration parameter 'inject_on_load' is set to 'true' this setter
+     * must be able to accept an instance of 'File' as the bundle will inject one here
+     * during Doctrine hydration.
+     *
+     * @param null |File $imageFile
+     */
+    /*public function setImageFile(?File $imageFile = null): void
+    {
+        $this->imageFile = $imageFile;
+
+        if ($this->imageFile instanceof UploadedFile) {
+            
+            $this->updatedAt = new \DateTime('now');
+        }
+    }
+
+    public function getImageFile(): ?File
+    {
+        return $this->imageFile;
+    }
+
+    public function setImageName(?string $imageName): void
+    {
+        $this->imageName = $imageName;
+    }
+
+    public function getImageName(): ?string
+    {
+        return $this->imageName;
+    }*/
 }

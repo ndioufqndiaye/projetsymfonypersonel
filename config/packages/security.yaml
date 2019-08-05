@@ -34,8 +34,8 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        - { path: ^/api/partenaire/new,   roles: ROLE_SUPER_ADMIN }
-        - { path: ^/api/administrateur,   roles: ROLE_PARTENAIRE }
+        - { path: ^/api/partenaire,   roles: ROLE_SUPER_ADMIN }
+        - { path: ^/api/depot,   roles: ROLE_CASSIER }
         - { path: ^/api/utilisateur,   roles: ROLE_ADMIN }
 
 
