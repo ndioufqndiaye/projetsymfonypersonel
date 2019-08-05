@@ -4,13 +4,16 @@ namespace App\Controller;
 
 use App\Entity\Compte;
 use App\Form\CompteType;
+use App\Entity\Partenaire;
 use App\Repository\CompteRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 /**
  * @Route("/compte")
@@ -30,18 +33,33 @@ class CompteController extends AbstractController
     /**
      * @Route("/comptePart", name="compte_new", methods={"GET","POST"})
      */
-    public function ajoutcompte(Request $request,SerializerInterface $serializer, EntityManagerInterface $entityManager)
+    public function ajoutcompte(Request $request,EntityManagerInterface $entityManager)
     {
-        $compte = new Compte();
-        $form=$this->createForm(CompteType::class,$compte);
-        $form->handleRequest($request);
-        $compte=$serializer->deserialize($request->getContent(), Compte::class, 'json');
-            $entityManager=$this->getDoctrine()->getManager();
+        $random=random_int(10000000,999999999);
+
+        $values = json_decode($request->getContent());
+       
+
+        $compte=new Compte();
+
+        $compte->setNumCompte($random);
+        $compte->setDateCreation(new \DateTime());
+        $compte->setSolde($values->solde);
+
+    $rep=$this->getDoctrine()->getRepository(Partenaire::class);
+    $Partenaire=$rep->find($values->Partenaire);
+    $compte->setPartenaire($Partenaire);
+
+            $repo = $this->getDoctrine()->getRepository(Compte::class);
+            
             $entityManager->persist($compte);
             $entityManager->flush();
-            return new Response('compte ajouter', Response::HTTP_CREATED);
-    }
 
+            return new Response(
+                ' and new compte with id: '.$compte->getId()
+            );
+   
+}
 
     /**
      * @Route("/{id}", name="compte_show", methods={"GET"})
