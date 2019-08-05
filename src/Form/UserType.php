@@ -20,22 +20,9 @@ class UserType extends AbstractType
     {
         $builder
             ->add('username')
-            ->add('roles')
-            ->add('plainPassword', PasswordType::class, [
-                // instead of being set onto the object directly,
-                // this is read and encoded in the controller
-                'mapped' => false,
-                'constraints' => [
-                    new NotBlank([
-                        'message' => 'Please enter a password',
-                    ]),
-                    new Length([
-                        'min' => 6,
-                        'minMessage' => 'Your password should be at least {{ limit }} characters',
-                        'max' => 4096,
-                    ]),
-                ],
-            ])
+           
+            ->add('password')
+                
             ->add('matricule')
             ->add('nom')
             ->add('prenom')
@@ -43,16 +30,16 @@ class UserType extends AbstractType
             ->add('adresse')
             ->add('telephone')
             ->add('status')
-            ->add('imagefile',VichImageType::class)
+            ->add('imageFile',VichImageType::class)
             
-            ->add('Partenaire',EntityType::class, [
+            /*->add('Partenaire',EntityType::class, [
                 'class' => Partenaire::class,
                 'choice_label' => 'partenaire_id']
             )
-            ->add('Partenaire',EntityType::class, [
+            ->add('compte',EntityType::class, [
                 'class' => Compte::class,
                 'choice_label' => 'compte_id']
-            )
+            )*/
         ;
     }
 

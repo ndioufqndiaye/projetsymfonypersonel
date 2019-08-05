@@ -30,16 +30,10 @@ class Compte
      */
     private $dateCreation;
 
-    
-
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Depot", mappedBy="compte")
      */
     private $Depot;
-
-
-
-
     /**
      * @ORM\Column(type="integer")
      */
